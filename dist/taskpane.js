@@ -34557,6 +34557,7 @@ function unicodeEscape(str) {
 // This entry needs to be wrapped in an IIFE because it needs to be in strict mode.
 !function() {
 "use strict";
+
 /*!*********************************!*\
   !*** ./src/taskpane/agave.html ***!
   \*********************************/

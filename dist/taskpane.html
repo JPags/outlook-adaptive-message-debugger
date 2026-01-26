@@ -1,48 +1,237 @@
 <!-- Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT License. -->
+<!-- This file shows how to design a first-run page that provides a welcome screen to the user about the features of the add-in. -->
+
 <!DOCTYPE html>
-<html>
-
+<html lang="en-us">
 <head>
-    <!-- Office JavaScript API -->
-    <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
-</head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Load the Office JavaScript APIs -->
+    <script src="https://appsforoffice.gcch.cdn.office.net/appsforoffice/lib/1/hosted/office.js" type="text/javascript"></script>
+    <!-- For more information on Fluent UI, visit https://developer.microsoft.com/fluentui#/. -->
+    <link rel="stylesheet" href="https://res-1.cdn.office.net/files/fabric-cdn-prod_20230815.002/office-ui-fabric-core/11.1.0/css/fabric.min.css"/>
+    
+    <link rel="stylesheet" href="f1a6e16b8d4852b443fd.css" /> <!-- Correct path to CSS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-jsonview@1.2.3/dist/jquery.jsonview.min.js"></script>
+    <title>Actionable Message Debugger</title>
+<script defer src="polyfill.js"></script><script defer src="taskpane.js"></script></head>
 
-<body>
-    <p>This add-in will insert the text "Hello world!" in a new message.</p>
-    <button id="helloButton">Say hello</button>
+<body class="ms-font-m ms-welcome ms-Fabric">
+    <div class="container">
+        <div>
+            <div id="main" class="main-button-container">
+                <button id="getProfileButton" class="popupButton main-block-button ms-Button ms-Button--primary full-width-row"><span
+                    class="ms-Button-label">Get My Mail Information </span></button>
+            </div>
+        </div> 
+        <div id="errorMessage"></div>
+        <div id="clientErrorblocksContainer">
+            <div class="messageBlock" id="clientNotSupportedMessage">
+                <div class="messageTitleBar toggleTitleBar">
+                    <div class="messageTitle">Actionable Messages</div>
+                    <div class="messageError">Not Supported</div>
+                    <div class="chevron titleClosed"></div>
+                </div>
+                <div class="messageDetailClosed">Your Outlook client does not support actionable messages yet. Check <a rel="noopener noreferrer" href="https://docs.microsoft.com/en-us/outlook/actionable-messages/#outlook-version-requirements-for-actionable-messages" target="_blank">Outlook version requirements for actionable messages</a>.</div>
+            </div>
 
-    <!-- The following image URL tracks diagnostic data for this sample add-in. Please remove the image tag if you reuse this sample in your own code project. -->
-    <img src="https://pnptelemetry.azurewebsites.net/pnp-officeaddins/samples/outlook-add-in-hello-world-run" />
+            <div class="messageBlock" id="adaptiveCardNotSupportedMessage">
+                <div class="messageTitleBar toggleTitleBar">
+                    <div class="messageTitle">Adaptive Card</div>
+                    <div class="messageError">Not Supported</div>
+                    <div class="chevron titleClosed"></div>
+                </div>
+                <div class="messageDetailClosed">Your Outlook client does not support Adaptive Card yet. Check <a rel="noopener noreferrer" href="https://docs.microsoft.com/en-us/outlook/actionable-messages/#outlook-version-requirements-for-actionable-messages" target="_blank">Outlook version requirements for actionable messages</a>.</div>
+            </div>
+
+            <div class="messageBlock" id="outlook2013Message">
+                <div class="messageTitleBar toggleTitleBar">
+                    <div class="messageTitle">Actionable Messages</div>
+                    <div class="messageError">Not Supported</div>
+                    <div class="chevron titleClosed"></div>
+                </div>
+                <div class="messageDetailClosed">Actionable Messages are not available in Outlook 2013. Check <a rel="noopener noreferrer" href="https://docs.microsoft.com/en-us/outlook/actionable-messages/#outlook-version-requirements-for-actionable-messages" target="_blank">Outlook version requirements for actionable messages</a>.</div>
+            </div>
+
+            <div class="messageBlock" id="outlookVersionMessage">
+                <div class="messageTitleBar toggleTitleBar">
+                    <div class="messageTitle">Outlook Version</div>
+                    <div class="messageError">Not Supported</div>
+                    <div class="chevron titleClosed"></div>
+                </div>
+                <div class="messageDetailClosed">Your Outlook version is outdated. Please update to the latest one to get actionable messages support.</div>
+            </div>
+        </div>
+        <div id="blocksContainer">
+            <div class="messageBlock" id="restError">
+                <div class="messageTitleBar toggleTitleBar">
+                    <div class="messageTitle">Load message info</div>
+                    <div class="messageError">Error</div>
+                    <div class="chevron titleClosed"></div>
+                </div>
+                <div class="messageDetailClosed">Error loading message data. Try close the add in and open it again.</div>
+            </div>
+
+            <div class="messageBlock" id="cardNotFound">
+                <div class="messageTitleBar toggleTitleBar">
+                    <div class="messageTitle">Card Enabled</div>
+                    <div class="messageError">False</div>
+                    <div class="chevron titleClosed"></div>
+                </div>
+                <div class="messageDetailClosed">No card is enabled on this message.</div>
+            </div>
+
+            <div class="messageBlock" id="originatorNotSetMessage">
+                <div class="messageTitleBar toggleTitleBar">
+                    <div class="messageTitle">Originator</div>
+                    <div class="messageError">Not Set</div>
+                    <div class="chevron titleClosed"></div>
+                </div>
+                <div class="messageDetailClosed">You need to set the originator in your payload to make actionable message work beyond your own mailbox. Please go to <a rel="noopener noreferrer" href="https://outlook.office.com/connectors/oam/publish" target="_blank">developer portal</a> to register your provider and set the originator property in your payload.</div>
+            </div>
+
+            <div class="messageBlock" id="spfDkimFailMessage">
+                <div class="messageTitleBar toggleTitleBar">
+                    <div class="messageTitle">SPF/DKIM check</div>
+                    <div class="messageError">Fail</div>
+                    <div class="chevron titleClosed"></div>
+                </div>
+                <div class="messageDetailClosed">SPF/DKIM check failed. Please <a rel="noopener noreferrer" href="https://blogs.technet.microsoft.com/fasttracktips/2016/07/16/spf-dkim-dmarc-and-exchange-online/" target="_blank">enable SPF, DKIM</a> to make actionable messages work.</div>
+            </div>
+
+            <div class="messageBlock" id="entityExtractionNotRun">
+                <div class="messageTitleBar toggleTitleBar">
+                    <div class="messageTitle">Actionable Messages processing</div>
+                    <div class="messageError">None</div>
+                    <div class="chevron titleClosed"></div>
+                </div>
+                <div class="messageDetailClosed">Actionable messages processing has not been performed on this message. Actionable messages are only enabled for Office 365.</div>
+            </div>
+
+            <div class="messageBlock" id="messageCardPayloadError">
+                <div class="messageTitleBar toggleTitleBar">
+                    <div class="messageTitle">Message Card payload parsing</div>
+                    <div class="messageError">Error</div>
+                    <div class="chevron titleClosed"></div>
+                </div>
+                <div class="messageDetailClosed">Message card payload found but could not be parsed. Please validate the payload. For adaptive card, put the payload in &lt;script type="application/adaptivecard+json"&gt;</div>
+            </div>
+
+            <div class="messageBlock" id="adaptiveCardPayloadError">
+                <div class="messageTitleBar toggleTitleBar">
+                    <div class="messageTitle">Adaptive Card payload parsing</div>
+                    <div class="messageError">Error</div>
+                    <div class="chevron titleClosed"></div>
+                </div>
+                <div class="messageDetailClosed">Adaptive card payload found but could not be parsed. Please validate the payload.</div>
+            </div>
+
+            <div class="messageBlock" id="stampingError">
+                <div class="messageTitleBar toggleTitleBar">
+                    <div class="messageTitle">Processing</div>
+                    <div class="messageError">Error</div>
+                    <div class="chevron titleOpen"></div>
+                </div>
+                <div class="messageDetailOpen"></div>
+            </div>
+
+            <div class="messageBlock" id="actionHistory">
+                <div class="messageTitleBar toggleTitleBar">
+                    <div class="messageTitle">Action Trace</div>
+                    <div class="messageButton">
+                        <button class="ms-Button actioncopy">
+                            <span>Copy</span>
+                        </button>
+                    </div>
+                    <div class="chevron titleOpen"></div>
+                </div>
+                <div class="messageDetailOpen jsonView">
+                    <div id="historyRecordTemplate">
+                        <div class="historyRecordTemplate">
+                            Time: <span class="performedAt"></span>
+                        </div>
+                        <div class="errorMessage"></div>
+                        <div>
+                            <div class="requestMethodUrlBlock">
+                                <span class="requestMethod"></span>
+                                <span class="requestUrl"></span>
+                            </div>
+                            <pre class="requestHeaders"></pre>
+                            <pre class="requestBody"></pre>
+                        </div>
+                        <div>
+                            <div class="responseStatusBlock">
+                                <span>Response status:</span>
+                                <span class="responseStatus"></span>
+                            </div>
+                            <pre class="responseHeaders"></pre>
+                            <pre class="responseBody"></pre>
+                        </div>
+                    </div>
+                    Latest Action:
+                    <div id="historyContainer"></div>
+                </div>
+            </div>
+
+            <div class="messageBlock" id="htmlBodyBlock">
+                <div class="messageTitleBar toggleTitleBar">
+                    <div class="messageTitle">Mail body HTML</div>
+                    <div class="messageButton">
+                        <button class="ms-Button actioncopy">
+                            <span>Copy</span>
+                        </button>
+                    </div>
+                    <div class="chevron titleClosed"></div>
+                </div>
+                <div class="messageDetailClosed jsonView"><pre></pre></div>
+            </div>
+
+            <div class="messageBlock" id="adaptiveCardBlock">
+                <div class="messageTitleBar toggleTitleBar">
+                    <div class="messageTitle">Adaptive Card</div>
+                    <div class="messageButton">
+                        <button class="ms-Button actioncopy">
+                            <span>Copy</span>
+                        </button>
+                    </div>
+                    <div class="chevron titleOpen"></div>
+                </div>
+                <div class="messageDetailOpen jsonView"><pre></pre></div>
+            </div>
+
+            <div class="messageBlock" id="messageCardBlock">
+                <div class="messageTitleBar toggleTitleBar">
+                    <div class="messageTitle">Message Card</div>
+                    <div class="messageButton">
+                        <button class="ms-Button actioncopy">
+                            <span>Copy</span>
+                        </button>
+                    </div>
+                    <div class="chevron titleOpen"></div>
+                </div>
+                <div class="messageDetailOpen jsonView"><pre></pre></div>
+            </div>
+
+            <div class="messageBlock" id="diagnosticsBlock">
+                <div class="messageTitleBar toggleTitleBar">
+                    <div class="messageTitle">Diagnostics</div>
+                    <div class="messageButton">
+                        <button class="ms-Button actioncopy">
+                            <span>Copy</span>
+                        </button>
+                    </div>
+                    <div class="chevron titleClosed"></div>
+                </div>
+                <div class="messageDetailClosed jsonView"><pre></pre></div>
+            </div>
+            <!-- <div class="footer-help ms-Button.ms-Button--primary">
+                <input id="sendMail" type="button" class="ms-Button ms-Button--primary" value="Ask for help" />
+                <a id="sendMailLink" href="#">Ask for help</a>
+            </div> -->
+        </div>
+    </div>
 </body>
-
-<script>
-
-    Office.onReady((info) => {
-        if (info.host === Office.HostType.Outlook) {
-            document.getElementById("helloButton").onclick = sayHello;
-        }
-    });
-
-    /**
-     * Writes "Hello world!" to a new message body.
-     */
-    function sayHello() {
-        Office.context.mailbox.item.body.setAsync(
-            "Hello world!",
-            {
-                coercionType: Office.CoercionType.Html, // Write text as HTML.
-            },
-
-            // Callback method to check that setAsync succeeded.
-            function (asyncResult) {
-                if (asyncResult.status ==
-                    Office.AsyncResultStatus.Failed) {
-                    write(asyncResult.error.message);
-                }
-            }
-        );
-    }
-
-</script>
 
 </html>
