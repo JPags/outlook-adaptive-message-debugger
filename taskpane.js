@@ -34010,7 +34010,7 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
 
 
 var publicClientApp = undefined;
-var domain = "https://graph.microsoft.com";
+var domain = "https://graph.microsoft.us";
 Office.onReady(/*#__PURE__*/function () {
   var _ref = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee(info) {
     return _regeneratorRuntime().wrap(function _callee$(_context) {
@@ -34025,7 +34025,7 @@ Office.onReady(/*#__PURE__*/function () {
           _context.next = 5;
           return (0,_azure_msal_browser__WEBPACK_IMPORTED_MODULE_4__.createNestablePublicClientApplication)({
             auth: {
-              clientId: "c39229c7-cdc4-45d6-8a75-ce69b0a0dbe4",
+              clientId: "541752ba-31fa-4b4f-9396-aaeae88de574",
               authority: "https://login.microsoftonline.com/common"
             },
             cache: {
@@ -34085,7 +34085,7 @@ function _run() {
       while (1) switch (_context3.prev = _context3.next) {
         case 0:
           tokenRequest = {
-            scopes: ["https://graph.microsoft.com/Mail.Read"]
+            scopes: ["https://graph.microsoft.us/Mail.Read"]
           };
           accessToken = null;
           jquery__WEBPACK_IMPORTED_MODULE_0___default()('#errorMessage').text('Loading...');
